@@ -7,11 +7,8 @@ const TutorWiseFormSection = () => {
         setIsChecked(!isChecked);
     };
 
-   
-
     return (
-        <div className="max-w-screen-md	 mx-auto p-0 md:p-6 lg:p-6 bg-white shadow-lg rounded-lg mt-10 md:mt-24 lg:mt-24">
-            
+        <div className="max-w-screen-md	 mx-auto p-6 bg-white shadow-lg rounded-lg mt-12">
             <h2 className="text-center text-2xl font-semibold mb-6">Let's Talk</h2>
             <form>
                 {/* First Row */}
@@ -67,8 +64,6 @@ const TutorWiseFormSection = () => {
             </form>
         </div>
     );
-
-    
 };
 
 export default TutorWiseFormSection;

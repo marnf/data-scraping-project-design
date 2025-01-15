@@ -11,7 +11,7 @@ import BecomeTutorSecondBanner from './BecomeTutorSecondBanner';
 const BecomeTutorPageBanner = () => {
     return (
         <div>
-       
+        {/* উপরের Section */}
         <div className="relative container mx-auto">
             <div
                 style={{ backgroundImage: `url(${bgImage})` }}
@@ -32,10 +32,10 @@ const BecomeTutorPageBanner = () => {
             </div>
         </div>
     
-       
+        {/* দ্বিতীয় Section */}
         <div style={{background:"#FBFBFB"}} className="container mx-auto -mt-20 relative z-0 bg- p-10 ">
             <div className="flex flex-wrap lg:flex-nowrap items-center justify-center p-8">
-               
+                {/* বাম পাশের কনটেন্ট */}
                 <div className="w-full lg:w-1/2 mx-auto space-y-8">
                     {/* Card 1 */}
                     <div className="flex items-center space-x-4">

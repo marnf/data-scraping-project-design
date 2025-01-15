@@ -17,7 +17,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: <TutorWiseContactPage />,
+        element: <MainPage />,
       }, 
     ]
   },
