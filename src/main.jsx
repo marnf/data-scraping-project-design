@@ -3,12 +3,13 @@ import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 import MainPage from './Component/MainPage/MainPage.jsx'
-import TutorWiseContactPage from '../src/Component/TutorWisePage/TutorWiseContactPage.jsx'
+
 import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
 import LayOut from './Component/LayOut/LayOut.jsx'
+import TutorWiseAllPages from './Component/TutorWiseAllPages.jsx'
 
 const router = createBrowserRouter([
   {
@@ -17,7 +18,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: <MainPage />,
+        element: <TutorWiseAllPages />,
       }, 
     ]
   },
