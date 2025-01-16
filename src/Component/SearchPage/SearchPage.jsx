@@ -1,24 +1,33 @@
-import React, { Component } from 'react';
-import ReactModal from 'react-modal-resizable-draggable';
-import '../SearchPage/SearchPage.css';
+
+
+
+
+import React, { Component } from "react";
+import ReactModal from "react-modal-resizable-draggable";
+import "../SearchPage/SearchPage.css";
 
 class SearchPage extends Component {
   constructor() {
     super();
     this.state = {
       modalIsOpen: false,
-      formData: {
-        url: '',
-        columnName: '',
-        selectorClass: '',
-        selectorType: 'image',
-        serial: 0,
-      },
+      formFields: [
+        {
+          id: Date.now(),
+          url: "",
+          columnName: "",
+          selectorClass: "",
+          selectorType: "image",
+          serial: 0,
+        },
+      ],
     };
 
     this.openModal = this.openModal.bind(this);
     this.closeModal = this.closeModal.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
+    this.addForm = this.addForm.bind(this);
+    this.removeForm = this.removeForm.bind(this);
     this.submitForm = this.submitForm.bind(this);
   }
 
@@ -30,35 +39,61 @@ class SearchPage extends Component {
     this.setState({ modalIsOpen: false });
   }
 
-  handleInputChange(event) {
+  handleInputChange(event, id) {
     const { name, value } = event.target;
     this.setState((prevState) => ({
-      formData: {
-        ...prevState.formData,
-        [name]: value,
-      },
+      formFields: prevState.formFields.map((field) =>
+        field.id === id ? { ...field, [name]: value } : field
+      ),
+    }));
+  }
+
+  addForm() {
+    if (this.state.formFields.length >= 10) {
+      alert("Maximum 10 forms allowed!");
+      return;
+    }
+    this.setState((prevState) => ({
+      formFields: [
+        ...prevState.formFields,
+        {
+          id: Date.now(),
+          url: "",
+          columnName: "",
+          selectorClass: "",
+          selectorName: "",
+          selectorType: "image",
+          serial: 0,
+        },
+      ],
+    }));
+  }
+
+  removeForm(id) {
+    this.setState((prevState) => ({
+      formFields: prevState.formFields.filter((field) => field.id !== id),
     }));
   }
 
   async submitForm() {
-    const { formData } = this.state;
-    console.log('Form data:', formData);
+    const { formFields } = this.state;
+    console.log("Form data:", formFields);
     try {
-      const response = await fetch('https://your-api-endpoint.com/data', {
-        method: 'POST',
+      const response = await fetch("https://your-api-endpoint.com/data", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(formFields),
       });
       if (response.ok) {
-        console.log('Data submitted successfully!');
-        this.closeModal(); // মডাল বন্ধ করুন
+        console.log("Data submitted successfully!");
+        this.closeModal();
       } else {
-        console.error('Failed to submit data:', response.status);
+        console.error("Failed to submit data:", response.status);
       }
     } catch (error) {
-      console.error('Error submitting data:', error);
+      console.error("Error submitting data:", error);
     }
   }
 
@@ -74,73 +109,107 @@ class SearchPage extends Component {
         {this.state.modalIsOpen && (
           <ReactModal
             initWidth={800}
-            initHeight={420}
-            minHeight={420}
+            initHeight={600}
+            minHeight={600}
             minWidth={500}
-            onFocus={() => console.log('Modal is clicked')}
-            className="my-modal-custom-class max-h-[420px] "
+            onFocus={() => console.log("Modal is clicked")}
+            className="   "
             isOpen={true}
           >
             <h3 className="text-xl font-bold mt-3">Form Modal</h3>
-            <div className="flex flex-col p-4 mt-4 w-full">
-              <label className="mb-2">URL:</label>
-              <input
-                type="text"
-                name="url"
-                value={this.state.formData.url}
-                onChange={this.handleInputChange}
-                className="border border-gray rounded p-2"
-              />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
-              <div className="flex flex-col">
-                <label className="mb-2">Column Name:</label>
-                <input
-                  type="text"
-                  name="columnName"
-                  value={this.state.formData.columnName}
-                  onChange={this.handleInputChange}
-                  className="border border-gray rounded p-2"
-                />
-              </div>
-              <div className="flex flex-col">
-                <label className="mb-2">Selector Class:</label>
-                <input
-                  type="text"
-                  name="selectorClass"
-                  value={this.state.formData.selectorClass}
-                  onChange={this.handleInputChange}
-                  className="border border-gray rounded p-2"
-                />
-              </div>
-              <div className="flex flex-col">
-                <label className="mb-2">Selector Type:</label>
-                <select
-                  name="selectorType"
-                  value={this.state.formData.selectorType}
-                  onChange={this.handleInputChange}
-                  className="select border border-gray rounded p-2"
+            <div className="p-4 mt-4 max-h-[450px] overflow-auto"> {/* Add max height and scrolling */}
+              {this.state.formFields.map((field, index) => (
+                <div
+                  key={field.id}
+                  className="border border-gray-300 p-4 rounded mb-2 relative"
                 >
-                  <option value="image">image</option>
-                  <option value="href">href</option>
-                  <option value="h">h</option>
-                  <option value="html">html</option>
-                  <option value="span">span</option>
-                  <option value="strong">strong</option>
-                  <option value="li">li</option>
-                  <option value="div">div</option>
-                </select>
-              </div>
-              <div className="flex flex-col">
-                <label className="mb-2">Serial:</label>
-                <input
-                  type="number"
-                  name="serial"
-                  value={this.state.formData.serial}
-                  onChange={this.handleInputChange}
-                  className="border border-gray rounded p-2"
-                />
-              </div>
+                  <h4 className="font-semibold mb-3">Form {index + 1}</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex flex-col">
+                      <label className="mb-2">URL:</label>
+                      <input
+                        type="text"
+                        name="url"
+                        value={field.url}
+                        onChange={(e) => this.handleInputChange(e, field.id)}
+                        className="border border-gray rounded p-2"
+                      />
+                    </div>
+                    <div className="flex flex-col">
+                      <label className="mb-2">Column Name:</label>
+                      <input
+                        type="text"
+                        name="columnName"
+                        value={field.columnName}
+                        onChange={(e) => this.handleInputChange(e, field.id)}
+                        className="border border-gray rounded p-2"
+                      />
+                    </div>
+                    <div className="flex flex-col">
+                      <label className="mb-2">Selector Class:</label>
+                      <input
+                        type="text"
+                        name="selectorClass"
+                        value={field.selectorClass}
+                        onChange={(e) => this.handleInputChange(e, field.id)}
+                        className="border border-gray rounded p-2"
+                      />
+                    </div>
+
+                    <div className="flex flex-col">
+                      <label className="mb-2">Selector Name:</label>
+                      <input
+                        type="text"
+                        name="selectorName"
+                        value={field.selectorName}
+                        onChange={(e) => this.handleInputChange(e, field.id)}
+                        className="border border-gray rounded p-2"
+                      />
+                    </div>
+
+                    <div className="flex flex-col">
+                      <label className="mb-2">Selector Type:</label>
+                      <select
+                        name="selectorType"
+                        value={field.selectorType}
+                        onChange={(e) => this.handleInputChange(e, field.id)}
+                        className="select border border-gray rounded p-2"
+                      >
+                        <option value="image">image</option>
+                        <option value="href">href</option>
+                        <option value="h">h</option>
+                        <option value="html">html</option>
+                        <option value="span">span</option>
+                        <option value="strong">strong</option>
+                        <option value="li">li</option>
+                        <option value="div">div</option>
+                      </select>
+                    </div>
+                    <div className="flex flex-col">
+                      <label className="mb-2">Serial:</label>
+                      <input
+                        type="number"
+                        name="serial"
+                        value={field.serial}
+                        onChange={(e) => this.handleInputChange(e, field.id)}
+                        className="border border-gray rounded p-2"
+                      />
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => this.removeForm(field.id)}
+                    className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+              <button
+                onClick={this.addForm}
+                className="bg-blue-500 text-white px-4 py-2 rounded "
+              >
+                Add Data
+              </button>
             </div>
             <div className="flex justify-end gap-3 mx-3">
               <button
@@ -157,6 +226,7 @@ class SearchPage extends Component {
               </button>
             </div>
           </ReactModal>
+
         )}
       </div>
     );
@@ -164,3 +234,4 @@ class SearchPage extends Component {
 }
 
 export default SearchPage;
+
