@@ -1,7 +1,7 @@
 
-// import { useEffect, useState } from "react";
-// import categoryImage from "../../assets/tenderwiseicons/Vector (5).png";
-// import departMentImage from "../../assets/tenderwiseicons/category.png";
+//  import { useEffect, useState } from "react";
+//  import categoryImage from "../../assets/tenderwiseicons/Vector (5).png";
+//  import departMentImage from "../../assets/tenderwiseicons/category.png";
 // import divisionImage from "../../assets/tenderwiseicons/division.png";
 // import districtImage from "../../assets/tenderwiseicons/district.png";
 // import sourceImage from "../../assets/tenderwiseicons/Source.png";
@@ -233,11 +233,25 @@ const TenderWiseSidebarModal = () => {
     const [subSectors, setSubSectors] = useState([]);
     const [showSectorDiv, setShowSectorDiv] = useState(false);
     const [showSubSectorDiv, setShowSubSectorDiv] = useState(false);
+    const [departments, setDepartments] = useState([]);
+    const [selectedDepartment, setSelectedDepartment] = useState(null);
+    const [showSubDepartmentModal, setShowSubDepartmentModal] = useState(false);
+    const [showSubDepartment, setShowSubDepartment] = useState(false);
+
+    const [divisions, setDivisions] = useState([]);
+    const [selectedDivision, setSelectedDivision] = useState(null);
+    const [districts, setDistricts] = useState([]);
+    const [selectedDistrict, setSelectedDistrict] = useState(null);
+    const [upazilas, setUpazilas] = useState([]);
+    const [showDistrictModal, setShowDistrictModal] = useState(false);
+    const [showUpazilaModal, setShowUpazilaModal] = useState(false);
+
+    const BASE_URL = "http://192.168.0.230:9009/api/v1"
 
     // Category fetch
     useEffect(() => {
         if (activeModal === 1) {
-            fetch("http://192.168.0.170:9009/api/v1/user/visitor/category")
+            fetch(`${BASE_URL}/user/visitor/category`)
                 .then(res => res.json())
                 .then(data => setCategories(data.data))
                 .catch(err => console.error("Error fetching categories:", err));
@@ -262,7 +276,7 @@ const TenderWiseSidebarModal = () => {
     useEffect(() => {
         if (selectedSector && selectedSector.id) {
             const selectedSectorId = selectedSector.id;
-            fetch(`http://192.168.0.170:9009/api/v1/user/visitor/sector`)
+            fetch(`${BASE_URL}/user/visitor/sector`)
                 .then((res) => res.json())
                 .then((data) => {
                     // Filter sub-sectors under the selected sector
@@ -278,6 +292,70 @@ const TenderWiseSidebarModal = () => {
     }, [selectedSector]);
 
 
+
+    // department sector
+
+    // **Department Fetch**
+    useEffect(() => {
+        if (activeModal === 2) {
+            fetch(`${BASE_URL}/user/visitor/department`)
+                .then(res => res.json())
+                .then(data => setDepartments(data.data))
+                .catch(err => console.error("Error fetching departments:", err));
+        }
+    }, [activeModal]);
+
+    const handleDepartmentChange = (department) => {
+        setSelectedDepartment(department.sub_departments)
+        console.log(department)
+        setShowSubDepartmentModal(true)
+    }
+
+
+    const handleSelectedSubDepartment = (subDepartment) => {
+        console.log(subDepartment)
+    }
+
+    // district modal
+
+    useEffect(() => {
+        if (activeModal === 3) {
+            fetch(`${BASE_URL}/user/visitor/division`)
+                .then(res => res.json())
+                .then(data => setDivisions(data.data))
+                .catch(err => console.error("Error fetching divisions:", err));
+        }
+    }, [activeModal]);
+
+    const handleDivisionChange = (division) => {
+        setSelectedDivision(division);
+        setDistricts(division.districts || []);
+        setShowDistrictModal(true);
+        setShowUpazilaModal(false);
+    };
+
+    const handleDistrictChange = (district) => {
+        console.log(district)
+        setSelectedDistrict(district.id);
+        fetch(`${BASE_URL}/user/visitor/district`)
+            .then(res => res.json())
+            .then(data => {
+
+                const filteredUpazilas = data.data.find(
+                    (district) => district.id === selectedDistrict
+                )?.upazilas || []; 
+                setUpazilas(filteredUpazilas)
+                console.log(filteredUpazilas)
+                console.log(district.id)
+                setShowUpazilaModal(true);
+
+
+
+            })
+            .catch(err => console.error("Error fetching upazilas:", err));
+    };
+
+
     return (
         <div className="block max-w-fit text-start border rounded border-1 relative">
             <div>
@@ -289,7 +367,7 @@ const TenderWiseSidebarModal = () => {
             {/* Button 1 - Categories */}
             <div className="relative">
                 <button
-                    className={`px-4 py-3 gap-2 border w-full text-black flex justify-start items-center rounded-md shadow-sm transition duration-200 ${activeModal === 1 ? "bg-blue-500 border-blue-500 text-white" : "bg-white border-gray-300"
+                    className={`px-3 py-2 gap-2 border border-b w-full text-black flex justify-start items-center ${activeModal === 1 ? "bg-blue-300 text-white border-blue-300" : ""
                         }`}
                     onClick={() => setActiveModal(activeModal === 1 ? null : 1)}
                 >
@@ -390,6 +468,210 @@ const TenderWiseSidebarModal = () => {
                     </div>
                 )}
             </div>
+            {/* Button 2 - Department */}
+            <div className="relative">
+                <button
+                    className={`px-3 py-2 gap-2 border border-b w-full text-black flex justify-start items-center ${activeModal === 2 ? "bg-blue-300 text-white border-blue-300" : ""
+                        }`}
+                    onClick={() => setActiveModal(activeModal === 2 ? null : 2)}
+                >
+                    <img src={departMentImage} alt="Department Group" className="w-5 h-5" />
+                    Department
+                </button>
+
+                {activeModal === 2 && (
+                    <div className="absolute left-full ml-4 top-0  text-black p-5   max-w-[95vw]">
+                        <div className="flex flex-col md:flex-row lg:flex-row gap-4 w-full">
+                            {/* Department List */}
+                            <div className="h-80 z-20 w-full sm:w-60 max-w-xs overflow-y-auto flex flex-col border rounded-lg shadow-md bg-white p-3">
+                                <div className="sticky top-0 bg-white z-10 p-2 shadow-sm">
+                                    <p className="font-bold text-lg mb-2">Department</p>
+                                </div>
+                                <div className="flex-1 overflow-y-auto">
+                                    {departments.map((department) => (
+                                        <div key={department.id} className="flex items-start gap-2 mb-2">
+                                            <input
+                                                type="radio"
+                                                name="department"
+                                                value={department.id}
+                                                onChange={() => handleDepartmentChange(department)}
+                                                className="mt-1"
+                                            />
+                                            <label className="break-words whitespace-normal max-w-[200px]">
+                                                {department.name}
+                                            </label>
+                                        </div>
+                                    ))}
+                                </div>
+                                <button
+                                    className="mt-3 px-4 py-2 bg-gray-400 text-white rounded-lg w-full"
+                                    onClick={() => setActiveModal(null)}
+                                >
+                                    Close
+                                </button>
+                            </div>
+
+                            {/* sub-department List */}
+                            {showSubDepartmentModal && (
+                                <div className="h-80 z-20 bg-white w-full sm:w-60 max-w-xs overflow-y-auto flex flex-col border rounded-lg shadow-md p-3">
+                                    <div className="sticky top-0 bg-white z-10 p-2 shadow-sm">
+                                        <p className="font-bold text-lg mb-2">Sub department</p>
+                                    </div>
+                                    <div className="flex-1 overflow-y-auto">
+                                        {selectedDepartment.map((subDepartment) => (
+                                            <div key={subDepartment.id} className="flex items-center gap-2 mb-2">
+                                                <input
+                                                    type="radio"
+                                                    name="subDepartment"
+                                                    value={subDepartment.id}
+                                                    onChange={() => handleSelectedSubDepartment(subDepartment)}
+                                                />
+                                                <label>{subDepartment.name}</label>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <button
+                                        className="mt-3 px-4 py-2 bg-gray-400 text-white rounded-lg w-full"
+                                        onClick={() => setShowSubDepartmentModal(false)}
+                                    >
+                                        Close
+                                    </button>
+                                </div>
+                            )}
+
+
+                        </div>
+                    </div>
+                )}
+
+            </div>
+
+            {/* Button 3 - Division */}
+            <div className="relative">
+                <button
+                    className={`px-3 py-2 gap-2 border border-b w-full text-black flex justify-start items-center ${activeModal === 3 ? "bg-blue-300 text-white border-blue-300" : ""
+                        }`}
+                    onClick={() => setActiveModal(activeModal === 3 ? null : 3)}
+                >
+                    <img src={divisionImage} alt="Division Group" className="w-5 h-5" />
+                    Division Group
+                </button>
+
+                {activeModal === 3 && (
+                    <div className="absolute left-full ml-4 top-0  text-black p-5 max-w-[95vw]">
+                        <div className="flex flex-col md:flex-row lg:flex-row gap-4 w-full">
+                            {/* Division List */}
+                            <div className="h-80 z-20 w-full sm:w-60 max-w-xs overflow-y-auto flex flex-col border rounded-lg shadow-md bg-white p-3">
+                                <div className="sticky top-0 bg-white z-10 p-2 shadow-sm">
+                                    <p className="font-bold text-lg mb-2">Divisions</p>
+                                </div>
+                                <div className="flex-1 overflow-y-auto">
+                                    {divisions.map((division) => (
+                                        <div key={division.id} className="flex items-start gap-2 mb-2">
+                                            <input
+                                                type="radio"
+                                                name="division"
+                                                value={division.id}
+                                                onChange={() => handleDivisionChange(division)}
+                                                className="mt-1"
+                                            />
+                                            <label className="break-words whitespace-normal max-w-[200px]">
+                                                {division.name}
+                                            </label>
+                                        </div>
+                                    ))}
+                                </div>
+                                <button
+                                    className="mt-3 px-4 py-2 bg-gray-400 text-white rounded-lg w-full"
+                                    onClick={() => setActiveModal(null)}
+                                >
+                                    Close
+                                </button>
+                            </div>
+
+                            {/* District List */}
+                            {showDistrictModal && (
+                                <div className="h-80 z-20 bg-white w-full sm:w-60 max-w-xs overflow-y-auto flex flex-col border rounded-lg shadow-md p-3">
+                                    <div className="sticky top-0 bg-white z-10 p-2 shadow-sm">
+                                        <p className="font-bold text-lg mb-2">Districts</p>
+                                    </div>
+                                    <div className="flex-1 overflow-y-auto">
+                                        {districts.map((district) => (
+                                            <div key={district.id} className="flex items-start gap-2 mb-2">
+                                                <input
+                                                    type="radio"
+                                                    name="district"
+                                                    value={district.id}
+                                                    onChange={() => handleDistrictChange(district)}
+                                                    className="mt-1"
+                                                />
+                                                <label>{district.name}</label>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <button
+                                        className="mt-3 px-4 py-2 bg-gray-400 text-white rounded-lg w-full"
+                                        onClick={() => setShowDistrictModal(false)}
+                                    >
+                                        Close
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* Upazila List */}
+                            {showUpazilaModal && (
+                                <div className="h-80 z-20 bg-white w-full sm:w-60 max-w-xs overflow-y-auto flex flex-col border rounded-lg shadow-md p-3">
+                                    <div className="sticky top-0 bg-white z-10 p-2 shadow-sm">
+                                        <p className="font-bold text-lg mb-2">Upazilas</p>
+                                    </div>
+                                    <div className="flex-1 overflow-y-auto">
+                                        {upazilas.map((upazila) => (
+                                            <div key={upazila.id} className="flex items-start gap-2 mb-2">
+                                                <input
+                                                    type="radio"
+                                                    name="upazila"
+                                                    value={upazila.id}
+                                                    className="mt-1"
+                                                />
+                                                <label>{upazila.name}</label>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <button
+                                        className="mt-3 px-4 py-2 bg-gray-400 text-white rounded-lg w-full"
+                                        onClick={() => setShowUpazilaModal(false)}
+                                    >
+                                        Close
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+            </div>
+
+
+
+            {/* Button 4 - Source */}
+            <div className="relative">
+                <button
+                    className={`px-3 py-2 gap-2 w-full text-black flex justify-start items-center rounded-b-lg ${activeModal === 4 ? "bg-blue-300 text-white border-blue-300" : ""
+                        }`}
+                    onClick={() => setActiveModal(activeModal === 4 ? null : 4)}
+                >
+                    <img src={sourceImage} alt="Source" className="w-5 h-5" />
+                    Source
+                </button>
+
+                {activeModal === 4 && (
+                    <div className="absolute left-full ml-4 top-0 w-64 bg-blue-300 text-black p-4 rounded shadow-lg">
+                        <p>Source Modal</p>
+                        <button className="mt-2 px-3 py-1 bg-gray-400 rounded" onClick={() => setActiveModal(null)}>
+                            Close
+                        </button>
+                    </div>
+                )}
+            </div>
 
 
 
@@ -398,3 +680,167 @@ const TenderWiseSidebarModal = () => {
 };
 
 export default TenderWiseSidebarModal;
+
+
+
+
+
+
+
+
+
+
+
+// import { useEffect, useState } from "react";
+// import divisionImage from "../../assets/tenderwiseicons/division.png";
+// import districtImage from "../../assets/tenderwiseicons/district.png";
+
+// const TenderWiseSidebarModal = () => {
+//     const [activeModal, setActiveModal] = useState(null);
+//     const [divisions, setDivisions] = useState([]);
+//     const [selectedDivision, setSelectedDivision] = useState(null);
+//     const [districts, setDistricts] = useState([]);
+//     const [selectedDistrict, setSelectedDistrict] = useState(null);
+//     const [upazilas, setUpazilas] = useState([]);
+//     const [showDistrictModal, setShowDistrictModal] = useState(false);
+//     const [showUpazilaModal, setShowUpazilaModal] = useState(false);
+
+//     const BASE_URL = "http://192.168.0.230:9009/api/v1";
+
+//     // Fetch Divisions
+//     useEffect(() => {
+//         if (activeModal === 3) {
+//             fetch(`${BASE_URL}/user/visitor/division`)
+//                 .then(res => res.json())
+//                 .then(data => setDivisions(data.data))
+//                 .catch(err => console.error("Error fetching divisions:", err));
+//         }
+//     }, [activeModal]);
+
+//     const handleDivisionChange = (division) => {
+//         setSelectedDivision(division);
+//         setDistricts(division.districts || []);
+//         setShowDistrictModal(true);
+//         setShowUpazilaModal(false);
+//     };
+
+//     const handleDistrictChange = (district) => {
+//         setSelectedDistrict(district);
+//         fetch(`${BASE_URL}/user/visitor/district/${district.id}`)
+//             .then(res => res.json())
+//             .then(data => {
+//                 setUpazilas(data.data.upazilas || []);
+//                 setShowUpazilaModal(true);
+//             })
+//             .catch(err => console.error("Error fetching upazilas:", err));
+//     };
+
+//     return (
+//         <div className="block max-w-fit text-start border rounded border-1 relative">
+//             {/* Button 3 - Division */}
+//             <div className="relative">
+//                 <button
+//                     className={`px-3 py-2 gap-2 border border-b w-full text-black flex justify-start items-center ${activeModal === 3 ? "bg-blue-300 text-white border-blue-300" : ""}`}
+//                     onClick={() => setActiveModal(activeModal === 3 ? null : 3)}
+//                 >
+//                     <img src={divisionImage} alt="Division Group" className="w-5 h-5" />
+//                     Division Group
+//                 </button>
+
+//                 {activeModal === 3 && (
+//                     <div className="absolute left-full ml-4 top-0  text-black p-5 max-w-[95vw]">
+//                         <div className="flex flex-col md:flex-row lg:flex-row gap-4 w-full">
+//                             {/* Division List */}
+//                             <div className="h-80 z-20 w-full sm:w-60 max-w-xs overflow-y-auto flex flex-col border rounded-lg shadow-md bg-white p-3">
+//                                 <div className="sticky top-0 bg-white z-10 p-2 shadow-sm">
+//                                     <p className="font-bold text-lg mb-2">Divisions</p>
+//                                 </div>
+//                                 <div className="flex-1 overflow-y-auto">
+//                                     {divisions.map((division) => (
+//                                         <div key={division.id} className="flex items-start gap-2 mb-2">
+//                                             <input
+//                                                 type="radio"
+//                                                 name="division"
+//                                                 value={division.id}
+//                                                 onChange={() => handleDivisionChange(division)}
+//                                                 className="mt-1"
+//                                             />
+//                                             <label className="break-words whitespace-normal max-w-[200px]">
+//                                                 {division.name}
+//                                             </label>
+//                                         </div>
+//                                     ))}
+//                                 </div>
+//                                 <button
+//                                     className="mt-3 px-4 py-2 bg-gray-400 text-white rounded-lg w-full"
+//                                     onClick={() => setActiveModal(null)}
+//                                 >
+//                                     Close
+//                                 </button>
+//                             </div>
+
+//                             {/* District List */}
+//                             {showDistrictModal && (
+//                                 <div className="h-80 z-20 bg-white w-full sm:w-60 max-w-xs overflow-y-auto flex flex-col border rounded-lg shadow-md p-3">
+//                                     <div className="sticky top-0 bg-white z-10 p-2 shadow-sm">
+//                                         <p className="font-bold text-lg mb-2">Districts</p>
+//                                     </div>
+//                                     <div className="flex-1 overflow-y-auto">
+//                                         {districts.map((district) => (
+//                                             <div key={district.id} className="flex items-start gap-2 mb-2">
+//                                                 <input
+//                                                     type="radio"
+//                                                     name="district"
+//                                                     value={district.id}
+//                                                     onChange={() => handleDistrictChange(district)}
+//                                                     className="mt-1"
+//                                                 />
+//                                                 <label>{district.name}</label>
+//                                             </div>
+//                                         ))}
+//                                     </div>
+//                                     <button
+//                                         className="mt-3 px-4 py-2 bg-gray-400 text-white rounded-lg w-full"
+//                                         onClick={() => setShowDistrictModal(false)}
+//                                     >
+//                                         Close
+//                                     </button>
+//                                 </div>
+//                             )}
+
+//                             {/* Upazila List */}
+//                             {showUpazilaModal && (
+//                                 <div className="h-80 z-20 bg-white w-full sm:w-60 max-w-xs overflow-y-auto flex flex-col border rounded-lg shadow-md p-3">
+//                                     <div className="sticky top-0 bg-white z-10 p-2 shadow-sm">
+//                                         <p className="font-bold text-lg mb-2">Upazilas</p>
+//                                     </div>
+//                                     <div className="flex-1 overflow-y-auto">
+//                                         {upazilas.map((upazila) => (
+//                                             <div key={upazila.id} className="flex items-start gap-2 mb-2">
+//                                                 <input
+//                                                     type="radio"
+//                                                     name="upazila"
+//                                                     value={upazila.id}
+//                                                     className="mt-1"
+//                                                 />
+//                                                 <label>{upazila.name}</label>
+//                                             </div>
+//                                         ))}
+//                                     </div>
+//                                     <button
+//                                         className="mt-3 px-4 py-2 bg-gray-400 text-white rounded-lg w-full"
+//                                         onClick={() => setShowUpazilaModal(false)}
+//                                     >
+//                                         Close
+//                                     </button>
+//                                 </div>
+//                             )}
+//                         </div>
+//                     </div>
+//                 )}
+//             </div>
+//         </div>
+//     );
+// };
+
+// export default TenderWiseSidebarModal;
